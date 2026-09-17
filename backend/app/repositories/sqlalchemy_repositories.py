@@ -7,7 +7,7 @@ resto de la aplicación no sabe (ni le importa) que la BD es Postgres.
 """
 from uuid import UUID
 
-from sqlalchemy import func, greatest
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.models import Analytics, Inventory, Player, ShopItem
@@ -86,7 +86,7 @@ class SqlAlchemyAnalyticsRepository(AnalyticsRepository):
             self._db.query(Analytics)
             .filter(
                 Analytics.player_id == player_id,
-                greatest(Analytics.factor_a, Analytics.factor_b) < nivel_actual,
+                func.greatest(Analytics.factor_a, Analytics.factor_b) < nivel_actual,
                 Analytics.fail_count > 0,
             )
             .order_by(Analytics.fail_count.desc())
