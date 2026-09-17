@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Monstruo Matemático</title>
+<link rel="stylesheet" href="css/styles.css" />
+<!-- Three.js vía CDN (import map): necesitas conexión a internet la
+     primera vez que el navegador lo descargue. No se usan modelos 3D
+     externos, solo la librería para dibujar la geometría procedural. -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
+</head>
+<body>
+
+  <div id="stage">
+
+    <!-- ================= PANTALLA 1: CREACIÓN ================= -->
+    <section id="screen-creation" class="screen">
+      <div class="creation-card">
+        <div class="creation-emoji" id="creation-preview">🟢</div>
+        <h1 class="prompt-text">¡Hola! ¿Cómo te llamas?</h1>
+        <input
+          id="input-nombre"
+          class="name-input"
+          type="text"
+          maxlength="40"
+          placeholder="Escribe tu nombre..."
+          autocomplete="off"
+        />
+
+        <p class="prompt-text prompt-small">Elige el color de tu amigo</p>
+        <div class="color-picker" id="color-picker">
+          <button class="color-dot" data-color="verde" style="--dot-color:#68D391" aria-label="Verde"></button>
+          <button class="color-dot" data-color="azul" style="--dot-color:#4FA8F0" aria-label="Azul"></button>
+          <button class="color-dot" data-color="rojo" style="--dot-color:#FF6F6F" aria-label="Rojo"></button>
+          <button class="color-dot" data-color="morado" style="--dot-color:#B187F0" aria-label="Morado"></button>
+        </div>
+
+        <button id="btn-despertar" class="btn-primary" disabled>¡Despertar! ✨</button>
+        <p class="error-text" id="creation-error" hidden></p>
+      </div>
+    </section>
+
+    <!-- ================= PANTALLA 2: JUEGO ================= -->
+    <section id="screen-game" class="screen" hidden>
+
+      <header class="topbar">
+        <div class="star-counter">
+          <span class="star-icon">⭐</span>
+          <span id="star-count">0</span>
+        </div>
+        <div class="level-badge">Tabla del <span id="level-number">1</span></div>
+      </header>
+
+      <!-- Pizarra con la operación actual -->
+      <div class="chalkboard">
+        <div class="chalkboard-frame">
+          <p id="operation-text" class="operation-text">? × ? = ?</p>
+        </div>
+      </div>
+
+      <!-- 3 cartas de opciones -->
+      <div id="cards-container" class="cards-container"></div>
+
+      <!-- Monstruo (escena Three.js real, sin emojis) -->
+      <div class="monster-area">
+        <canvas id="monster-canvas" class="monster-canvas"></canvas>
+        <div id="monster-mouth" class="monster-mouth" aria-label="Boca del monstruo"></div>
+      </div>
+
+      <!-- Botón / panel de la Nevera Mágica -->
+      <button id="btn-nevera" class="btn-nevera" hidden>🧊</button>
+
+      <div id="shop-panel" class="shop-panel" hidden>
+        <p class="shop-title">Nevera Mágica</p>
+        <div id="shop-items" class="shop-items"></div>
+        <p class="shop-hint">Arrastra la comida hasta la boca del monstruo</p>
+      </div>
+
+    </section>
+
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

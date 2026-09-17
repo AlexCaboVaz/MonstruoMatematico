@@ -1,0 +1,19 @@
+# Entorno virtual de Python y cachés
+backend/venv/
+**/__pycache__/
+**/*.pyc
+
+# Dependencias y compilaciones del frontend
+frontend/node_modules/
+frontend/android/.gradle/
+frontend/android/**/build/
+frontend/android/capacitor-cordova-android-plugins/
+
+# Nunca subir credenciales de base de datos
+backend/.env
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+.idea/
+backend/.git/
