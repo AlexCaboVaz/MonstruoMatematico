@@ -17,5 +17,19 @@ export const FASES_MONSTRUO = Object.freeze({
   EPICA: 'epica',
 });
 
-// Debe coincidir con `settings.nivel_maximo` del backend (Fase 2).
+// Debe coincidir con `settings.nivel_maximo` del backend.
 export const NIVEL_MAXIMO = 10;
+
+// Rotación de matiz (CSS hue-rotate) para cada color de slime sobre
+// la ilustración base de Multidrake, que está dibujada en verde
+// (hue real ≈ 98°, medido sobre el propio PNG). El valor NO es el
+// tono final, es la ROTACIÓN necesaria para llegar a él:
+// rotación = (tono_objetivo - 98) mod 360.
+// Única fuente de verdad: la usan tanto Monster.js como
+// CreationScreen.js, para que no puedan desincronizarse entre sí.
+export const HUE_POR_COLOR = Object.freeze({
+  verde: '0deg',
+  azul: '117deg',
+  rojo: '257deg',
+  morado: '177deg',
+});

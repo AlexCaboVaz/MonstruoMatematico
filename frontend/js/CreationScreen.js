@@ -1,3 +1,5 @@
+import { HUE_POR_COLOR } from './config.js';
+
 /**
  * CreationScreen
  * --------------
@@ -29,12 +31,13 @@ export class CreationScreen {
     });
     botonElegido.classList.add('selected');
     this._colorSeleccionado = botonElegido.dataset.color;
-    this._el.preview.style.filter = `hue-rotate(${this._gradosPorColor(this._colorSeleccionado)})`;
+    // Se incluye la misma sombra que ya trae por CSS: al fijar
+    // `style.filter` desde JS se sustituye el filtro entero, así que
+    // si solo pusiéramos el hue-rotate, la sombra desaparecería en
+    // cuanto se eligiera un color.
+    this._el.preview.style.filter =
+      `hue-rotate(${HUE_POR_COLOR[this._colorSeleccionado] ?? '0deg'}) drop-shadow(0 8px 18px rgba(0,0,0,0.35))`;
     this._revisarFormulario();
-  }
-
-  _gradosPorColor(color) {
-    return { verde: '0deg', azul: '150deg', rojo: '220deg', morado: '280deg' }[color] ?? '0deg';
   }
 
   _revisarFormulario() {

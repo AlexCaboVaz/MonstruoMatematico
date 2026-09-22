@@ -1,9 +1,9 @@
 """
 models.py
 ---------
-Modelos ORM (SQLAlchemy) que mapean 1:1 el esquema definido en la
-Fase 1 (schema.sql). Esta capa solo describe la forma de los datos;
-no contiene ninguna regla de negocio (eso vive en `services/`).
+Modelos ORM (SQLAlchemy) que mapean 1:1 el esquema definido en
+schema.sql. Esta capa solo describe la forma de los datos; no
+contiene ninguna regla de negocio (eso vive en `services/`).
 """
 import uuid
 from datetime import datetime

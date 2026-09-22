@@ -93,6 +93,7 @@ button:focus-visible, input:focus-visible {
   align-items: center;
   padding: 16px 20px;
   overflow-y: auto;
+  position: relative;
 }
 
 /* Esta regla es la que faltaba: sin ella, `.screen { display:flex }`
@@ -105,18 +106,47 @@ button:focus-visible, input:focus-visible {
 /* =====================================================================
    PANTALLA 1 — Creación de personaje
    ===================================================================== */
+.creation-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0 18px;
+}
+.creation-logo-icon {
+  font-size: 2rem;
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4));
+}
+.creation-logo-text {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.6rem;
+  letter-spacing: 1px;
+  background: linear-gradient(160deg, var(--gold-400), #ffe9a8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 3px 10px rgba(255, 201, 60, 0.25);
+}
+
 .creation-card {
   margin: auto 0;
   width: 100%;
+  max-width: 340px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   text-align: center;
+  padding: 28px 22px;
+  background: linear-gradient(180deg, var(--night-800), var(--night-900));
+  border: 2px solid rgba(255, 201, 60, 0.2);
+  border-radius: 30px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06);
 }
 
 .creation-emoji {
-  font-size: 88px;
+  width: 150px;
+  height: auto;
   filter: drop-shadow(0 8px 18px rgba(0,0,0,0.35));
   animation: float-idle 3.2s ease-in-out infinite;
 }
@@ -124,56 +154,67 @@ button:focus-visible, input:focus-visible {
 .prompt-text {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.4rem;
-  margin: 6px 0 0;
+  font-size: 1.35rem;
+  margin: 4px 0 0;
+  letter-spacing: 0.3px;
 }
-.prompt-small { font-size: 1.05rem; opacity: 0.9; }
+.prompt-small { font-size: 1rem; opacity: 0.85; margin-top: 6px; }
 
 .name-input {
   width: 100%;
-  padding: 14px 18px;
+  padding: 15px 18px;
   border-radius: 18px;
-  border: none;
+  border: 2px solid transparent;
   font-size: 1.1rem;
   font-family: var(--font-body);
   font-weight: 800;
   text-align: center;
   background: var(--chalk-50);
   color: var(--night-900);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.name-input:focus {
+  outline: none;
+  border-color: var(--gold-400);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.15), 0 0 0 4px rgba(255, 201, 60, 0.25);
 }
 
 .color-picker {
   display: flex;
-  gap: 16px;
-  margin-top: 4px;
+  gap: 14px;
+  margin-top: 2px;
 }
 
 .color-dot {
-  width: 56px;
-  height: 56px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   border: 4px solid transparent;
   background: var(--dot-color);
-  box-shadow: 0 6px 0 rgba(0,0,0,0.25);
-  transition: transform 0.15s ease, border-color 0.15s ease;
+  box-shadow: 0 5px 0 rgba(0,0,0,0.3), 0 8px 14px rgba(0,0,0,0.25);
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 .color-dot:hover { transform: translateY(-2px) scale(1.05); }
 .color-dot.selected {
-  border-color: var(--chalk-50);
+  border-color: #fff;
   transform: scale(1.15);
+  box-shadow: 0 5px 0 rgba(0,0,0,0.3), 0 0 0 4px rgba(255, 201, 60, 0.4);
 }
 
 .btn-primary {
-  margin-top: 10px;
+  margin-top: 8px;
+  width: 100%;
   padding: 16px 36px;
   border: none;
-  border-radius: 24px;
+  border-radius: 22px;
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 1.2rem;
+  font-size: 1.15rem;
+  letter-spacing: 0.3px;
   color: var(--night-900);
-  background: var(--gold-400);
-  box-shadow: 0 6px 0 var(--gold-600);
+  background: linear-gradient(160deg, #ffe9a8, var(--gold-400));
+  box-shadow: 0 6px 0 var(--gold-600), 0 10px 18px rgba(0,0,0,0.3);
   transition: transform 0.1s ease, box-shadow 0.1s ease, opacity 0.2s ease;
 }
 .btn-primary:not(:disabled):active {
@@ -189,7 +230,286 @@ button:focus-visible, input:focus-visible {
 }
 
 /* =====================================================================
-   PANTALLA 2 — Juego
+   PANTALLA 2 — Hub de Mundos
+   ===================================================================== */
+.hub-content {
+  margin-top: 24px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+}
+
+.hub-greeting {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.3rem;
+  text-align: center;
+  margin: 0;
+}
+
+.world-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.world-card {
+  aspect-ratio: 1 / 1;
+  border: none;
+  border-radius: 26px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--chalk-50);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.95rem;
+  text-align: center;
+  padding: 12px;
+  box-shadow: 0 6px 0 rgba(0,0,0,0.3), 0 10px 20px rgba(0,0,0,0.3);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.world-card:active {
+  transform: scale(0.96) translateY(3px);
+  box-shadow: 0 2px 0 rgba(0,0,0,0.3);
+}
+
+/* Tarjetas del Hub: la isla real flotando (transparente), sin caja
+   ni degradado — el título ya viene dibujado en la propia imagen
+   para Resta/Multiplicación/División; Suma lleva una etiqueta propia
+   porque su imagen (reutilizada de su hoja de niveles) no la trae. */
+.world-card--foto {
+  background: none;
+  padding: 8px;
+  position: relative;
+}
+.world-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 12px rgba(0,0,0,0.45));
+}
+.world-card-label-overlay {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: var(--chalk-50);
+  background: linear-gradient(160deg, #4a3a7a, var(--night-800));
+  padding: 4px 12px;
+  border-radius: 14px;
+  box-shadow: 0 3px 0 rgba(0,0,0,0.25);
+  white-space: nowrap;
+}
+
+.submenu-back {
+  position: absolute;
+  top: 16px;
+  left: 20px;
+  z-index: 5;
+}
+
+/* =====================================================================
+   Mundo Matemático genérico (Sumas, Multiplicaciones, y futuras
+   Restas/Divisiones): selección de nivel + 20 operaciones + input.
+   ===================================================================== */
+.math-level-select {
+  width: 100%;
+  margin-top: 44px; /* deja sitio a la flecha de volver, sin centrar verticalmente */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+}
+.math-level-select[hidden] { display: none; }
+
+.math-level-grid {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.math-level-card {
+  height: 130px;
+  border: none;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 8px;
+  transition: transform 0.12s ease;
+}
+.math-level-card:active { transform: scale(0.96); }
+
+.math-level-card-img {
+  height: 100%;
+  max-width: 60%;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 10px rgba(0,0,0,0.4));
+}
+
+.math-level-card-label {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--chalk-50);
+  background: linear-gradient(160deg, #4a3a7a, var(--night-800));
+  padding: 6px 14px;
+  border-radius: 16px;
+  box-shadow: 0 3px 0 rgba(0,0,0,0.25);
+  white-space: nowrap;
+}
+
+.math-operation-view {
+  width: 100%;
+  margin: auto 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.math-operation-view[hidden] { display: none; }
+
+.math-progress {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  background: linear-gradient(160deg, #4a3a7a, var(--night-800));
+  padding: 6px 16px;
+  border-radius: 16px;
+  box-shadow: 0 3px 0 rgba(0,0,0,0.25);
+}
+
+.math-dragon-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 190px;
+}
+
+/* Más grande aquí que en Tablas de Multiplicar: en Sumas/Restas/
+   Multiplicaciones/División el dragón es el único protagonista
+   visual en pantalla (no comparte espacio con la Nevera ni el mapa),
+   así que puede permitirse más presencia. Selector por ID a
+   propósito: así gana siempre a `.monster-img`, sin depender de en
+   qué orden aparezcan las reglas en este archivo. */
+#math-dragon-img {
+  width: 62%;
+  max-width: 230px;
+}
+
+.math-answer-input {
+  width: 100%;
+  max-width: 220px;
+  padding: 16px;
+  border-radius: 18px;
+  border: 3px solid rgba(255, 201, 60, 0.35);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.6rem;
+  text-align: center;
+  background: var(--chalk-50);
+  color: var(--night-900);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
+}
+.math-answer-input:focus {
+  outline: none;
+  border-color: var(--gold-400);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.15), 0 0 0 4px rgba(255, 201, 60, 0.25);
+}
+.math-answer-input.input-shake {
+  animation: card-shake 0.5s ease;
+  border-color: var(--red-400);
+}
+
+.math-level-complete {
+  margin: auto 0;
+  text-align: center;
+}
+.math-level-complete-text {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.6rem;
+  animation: modal-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* =====================================================================
+   Minijuego de recompensa: Multidrake atrapa la comida que cae.
+   Sustituye al simple cartel de "Nivel completado" al terminar las
+   20 operaciones. Reutiliza los mismos emojis de la Nevera Mágica
+   (Tablas de Multiplicar) para que la "comida" sea coherente en todo
+   el juego, más bombas 💣 que hay que evitar.
+   ===================================================================== */
+.catch-game {
+  position: relative;
+  width: 100%;
+  height: 440px;
+  margin: auto 0;
+}
+
+.catch-progress {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  background: linear-gradient(160deg, #4a3a7a, var(--night-800));
+  padding: 6px 16px;
+  border-radius: 16px;
+  box-shadow: 0 3px 0 rgba(0,0,0,0.25);
+}
+
+.catch-play-area {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  touch-action: none; /* evita el scroll/zoom del navegador al arrastrar */
+  cursor: grab;
+}
+
+.falling-item {
+  position: absolute;
+  top: -40px;
+  font-size: 2.1rem;
+  user-select: none;
+  pointer-events: none; /* el contacto lo detecta el dragón, no un toque directo */
+  animation-name: catch-fall;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+  z-index: 1;
+  filter: drop-shadow(0 3px 4px rgba(0,0,0,0.35));
+}
+.falling-item.atrapado {
+  animation: catch-pop 0.35s ease forwards !important;
+  pointer-events: none;
+}
+
+.catch-dragon-img {
+  position: absolute;
+  bottom: 0;
+  width: 92px;
+  z-index: 2;
+  pointer-events: none;
+  filter: drop-shadow(0 10px 14px rgba(0,0,0,0.35));
+}
+.catch-dragon-img.catch-dragon-feliz { animation: monster-pop 0.5s ease; }
+.catch-dragon-img.catch-dragon-enfadado { animation: monster-shake 0.4s ease; }
+
+/* =====================================================================
+   PANTALLA 3 — Juego
    ===================================================================== */
 .topbar {
   width: 100%;
@@ -207,8 +527,12 @@ button:focus-visible, input:focus-visible {
 }
 
 .menu-container {
-  position: relative;
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 2000;
 }
+.menu-container[hidden] { display: none; }
 
 .btn-menu {
   width: 40px;
@@ -274,6 +598,18 @@ button:focus-visible, input:focus-visible {
   font-size: 0.95rem;
   box-shadow: 0 3px 0 rgba(0,0,0,0.25);
   border: 2px solid rgba(177, 135, 240, 0.4);
+}
+.level-badge--tappable {
+  font-family: var(--font-body);
+  color: var(--chalk-50);
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+.level-badge--tappable:active { transform: scale(0.96); }
+.level-badge-chevron {
+  display: inline-block;
+  margin-left: 2px;
+  opacity: 0.8;
 }
 
 /* Pizarra */
@@ -384,6 +720,9 @@ button:focus-visible, input:focus-visible {
 }
 .monster-img-evolucion {
   animation: monster-pop 0.8s ease;
+}
+.monster-img-enfadado {
+  animation: monster-shake 0.4s ease;
 }
 
 .monster-name {
@@ -706,6 +1045,24 @@ button:focus-visible, input:focus-visible {
   30% { transform: scale(1.12) rotate(-2deg); }
   60% { transform: scale(0.96) rotate(2deg); }
   100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes monster-shake {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  20% { transform: translateX(-8px) rotate(-4deg); }
+  40% { transform: translateX(7px) rotate(4deg); }
+  60% { transform: translateX(-5px) rotate(-3deg); }
+  80% { transform: translateX(4px) rotate(2deg); }
+}
+
+@keyframes catch-fall {
+  from { top: -40px; }
+  to { top: 100%; }
+}
+
+@keyframes catch-pop {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.8); opacity: 0; }
 }
 
 @keyframes sparkle-twinkle {

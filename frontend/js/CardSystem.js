@@ -6,14 +6,16 @@ import { AudioFx } from './AudioFx.js';
  * Gestiona la ronda de 12 cartas: pinta la pizarra y las 3 opciones,
  * procesa la respuesta del niño con feedback 100% positivo, reencola
  * los fallos al final de la cola y avisa cuando la ronda termina.
- * No sabe nada de la Nevera Mágica ni del monstruo — solo notifica
- * `onRondaCompleta` cuando la cola queda vacía (Single Responsibility).
+ * No sabe nada de la Nevera Mágica — pero sí notifica al Sistema
+ * Global del Dragón (`dragon`) en cada acierto/fallo, igual que
+ * hacen el resto de mundos (Sumas, Restas, Multiplicaciones, División).
  */
 export class CardSystem {
-  constructor({ apiClient, gameState, elements, onRondaCompleta }) {
+  constructor({ apiClient, gameState, elements, dragon, onRondaCompleta }) {
     this._api = apiClient;
     this._gameState = gameState;
     this._el = elements; // { operationText, cardsContainer, starIcon, starCount, levelNumber }
+    this._dragon = dragon;
     this._onRondaCompleta = onRondaCompleta;
     this._audio = new AudioFx();
 
@@ -62,9 +64,14 @@ export class CardSystem {
     if (esCorrecta) {
       botonElegido.classList.add('correcta');
       this._audio.reproducirAcierto();
+      this._dragon.reaccionarAcierto();
     } else {
       botonElegido.classList.add('incorrecta');
       this._audio.reproducirMuelle();
+      // No persistente: en Tablas la siguiente carta es una pregunta
+      // distinta (la fallada vuelve al final de la cola), así que el
+      // enfado es un destello breve, no un estado que deba mantenerse.
+      this._dragon.reaccionarFallo();
     }
 
     try {

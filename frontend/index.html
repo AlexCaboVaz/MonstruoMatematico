@@ -12,12 +12,26 @@
 </head>
 <body>
 
+  <!-- Menú global: visible en todo momento tras crear el personaje,
+       en cualquier mundo/pantalla, para poder volver siempre al Hub. -->
+  <div id="global-menu-container" class="menu-container" hidden>
+    <button id="btn-menu" class="btn-menu" type="button" aria-label="Menú">☰</button>
+    <div id="menu-dropdown" class="menu-dropdown" hidden>
+      <button type="button" id="menu-item-inicio" class="menu-item">🏠 Menú principal</button>
+      <button type="button" id="menu-item-salir" class="menu-item">🚪 Salir</button>
+    </div>
+  </div>
+
   <div id="stage">
 
     <!-- ================= PANTALLA 1: CREACIÓN ================= -->
     <section id="screen-creation" class="screen">
+      <div class="creation-logo">
+        <span class="creation-logo-icon">🐉</span>
+        <span class="creation-logo-text">Multidrake</span>
+      </div>
       <div class="creation-card">
-        <div class="creation-emoji" id="creation-preview">🟢</div>
+        <img class="creation-emoji" id="creation-preview" src="assets/multidrake-reposo.png" alt="Multidrake" />
         <h1 class="prompt-text">¡Hola! ¿Cómo te llamas?</h1>
         <input
           id="input-nombre"
@@ -41,23 +55,105 @@
       </div>
     </section>
 
-    <!-- ================= PANTALLA 2: JUEGO ================= -->
+    <!-- ================= PANTALLA 2: HUB DE MUNDOS ================= -->
+    <section id="screen-hub" class="screen" hidden>
+      <div class="hub-content">
+        <p class="hub-greeting" id="hub-greeting">¿A qué mundo quieres ir?</p>
+        <div class="world-grid">
+          <button type="button" id="world-suma" class="world-card world-card--foto">
+            <img src="assets/hub/suma.png" alt="Mundo de la Suma" class="world-card-img" />
+          </button>
+          <button type="button" id="world-resta" class="world-card world-card--foto">
+            <img src="assets/hub/resta.png" alt="Mundo de la Resta" class="world-card-img" />
+          </button>
+          <button type="button" id="world-multiplicacion" class="world-card world-card--foto">
+            <img src="assets/hub/multiplicacion.png" alt="Mundo de la Multiplicación" class="world-card-img" />
+          </button>
+          <button type="button" id="world-division" class="world-card world-card--foto">
+            <img src="assets/hub/division.png" alt="Mundo de la División" class="world-card-img" />
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= PANTALLA: SUBMENÚ MULTIPLICACIÓN ================= -->
+    <section id="screen-mult-submenu" class="screen" hidden>
+      <div class="hub-content">
+        <button type="button" id="btn-mult-submenu-back" class="btn-menu submenu-back" aria-label="Volver">←</button>
+        <p class="hub-greeting">Mundo de la Multiplicación</p>
+        <div class="world-grid">
+          <button type="button" id="submenu-tablas" class="world-card world-card--foto">
+            <img src="assets/hub/mult-submenu-tablas.png" alt="Tablas de Multiplicar" class="world-card-img" />
+          </button>
+          <button type="button" id="submenu-multiplicaciones" class="world-card world-card--foto">
+            <img src="assets/hub/mult-submenu-multiplicaciones.png" alt="Multiplicaciones" class="world-card-img" />
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= PANTALLA: MUNDO MATEMÁTICO GENÉRICO =================
+         Reutilizada por Sumas y Multiplicaciones (y, en la próxima fase,
+         Restas y Divisiones): selección de nivel -> 20 operaciones con
+         input numérico -> "¡Nivel completado!". -->
+    <section id="screen-math-world" class="screen" hidden>
+
+      <!-- Selección de nivel -->
+      <div id="math-level-select" class="math-level-select">
+        <button type="button" id="btn-math-back" class="btn-menu submenu-back" aria-label="Volver">←</button>
+        <p class="hub-greeting" id="math-world-title">Mundo de la Suma</p>
+        <div id="math-level-grid" class="math-level-grid"></div>
+      </div>
+
+      <!-- Pantalla de operación -->
+      <div id="math-operation-view" class="math-operation-view" hidden>
+        <div class="math-progress" id="math-progress">1 / 20</div>
+
+        <div class="math-dragon-area">
+          <img id="math-dragon-img" class="monster-img math-dragon-img" src="assets/multidrake-reposo.png" alt="Multidrake" />
+        </div>
+
+        <div class="chalkboard">
+          <div class="chalkboard-frame">
+            <p id="math-operation-text" class="operation-text">? + ? = ?</p>
+          </div>
+        </div>
+
+        <input
+          id="math-answer-input"
+          class="math-answer-input"
+          type="number"
+          inputmode="numeric"
+          placeholder="?"
+        />
+        <button type="button" id="btn-math-comprobar" class="btn-primary">Comprobar</button>
+      </div>
+
+      <!-- Minijuego de recompensa: Multidrake atrapa la comida que cae -->
+      <div id="math-catch-game" class="catch-game" hidden>
+        <div class="catch-progress" id="catch-progress">0 / 20</div>
+        <div id="catch-play-area" class="catch-play-area"></div>
+        <img id="catch-dragon-img" class="catch-dragon-img" src="assets/multidrake-atrapa.png" alt="Multidrake atrapando comida" />
+      </div>
+
+      <!-- Nivel completado -->
+      <div id="math-level-complete" class="math-level-complete" hidden>
+        <p class="math-level-complete-text">🎉 ¡Nivel completado! 🎉</p>
+      </div>
+
+    </section>
+
+    <!-- ================= PANTALLA 3: JUEGO (Mundo Multiplicación) ================= -->
     <section id="screen-game" class="screen" hidden>
 
       <header class="topbar">
         <div class="topbar-left">
-          <div class="menu-container">
-            <button id="btn-menu" class="btn-menu" type="button" aria-label="Menú">☰</button>
-            <div id="menu-dropdown" class="menu-dropdown" hidden>
-              <button type="button" id="menu-item-mapa" class="menu-item">🗺️ Mapa de tablas</button>
-            </div>
-          </div>
           <div class="star-counter">
             <span class="star-icon">⭐</span>
             <span id="star-count">0</span>
           </div>
         </div>
-        <div class="level-badge">Tabla del <span id="level-number">1</span></div>
+        <button type="button" id="btn-selector-tabla" class="level-badge level-badge--tappable">Tabla del <span id="level-number">1</span> <span class="level-badge-chevron">▾</span></button>
       </header>
 
       <!-- Mapa de tablas: mundo de niveles ambientado en dragones -->

@@ -14,10 +14,10 @@ def build_operation_id(factor_a: int, factor_b: int) -> str:
     return f"{a}x{b}"
 
 
-# Rangos de nivel -> fase visual del monstruo (ver especificación de
-# Fase 3). Vive aquí, no en el frontend, porque `fase_monstruo` es un
-# dato persistido en `players` y el backend debe ser la fuente única
-# de verdad sobre en qué fase está el monstruo de cada jugador.
+# Rangos de nivel -> fase visual del monstruo. Vive aquí, no en el
+# frontend, porque `fase_monstruo` es un dato persistido en `players`
+# y el backend debe ser la fuente única de verdad sobre en qué fase
+# está el monstruo de cada jugador.
 _RANGOS_FASE = (
     (1, 2, "bebe"),
     (3, 4, "infantil"),

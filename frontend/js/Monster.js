@@ -1,23 +1,30 @@
 import { Confetti } from './Confetti.js';
+import { HUE_POR_COLOR } from './config.js';
 
 /**
- * Monster ("Multidrake") — versión con ilustración real
- * -------------------------------------------------------
- * Renderiza a Multidrake como una imagen 2D (ilustración del propio
- * usuario), no como geometría 3D generada por código. Tres sprites
- * cubren los tres momentos del juego:
- *   - reposo.png    -> mientras se resuelven las cartas
- *   - comiendo.png  -> al recibir comida en la Nevera Mágica
- *   - evolucion.png -> al evolucionar de tabla (celebración)
+ * Monster ("Multidrake") — Sistema Global del Dragón
+ * -----------------------------------------------------
+ * Componente único y reutilizable para TODO el juego: es el sistema
+ * global de reacciones que cualquier mundo (Sumas, Restas,
+ * Multiplicaciones, División, Tablas de Multiplicar) usa para dar
+ * feedback de acierto/fallo, sin duplicar lógica.
  *
- * Como solo hay UN diseño (no uno distinto por cada fase bebé/
- * infantil/joven/épica), el crecimiento entre fases se representa
- * agrandando la misma ilustración — más simple y honesto que
- * fingir accesorios que no están dibujados.
+ * Cuatro sprites cubren todos los estados del juego:
+ *   - reposo.png    -> estado por defecto, mientras se piensa la respuesta
+ *   - evolucion.png -> "feliz": acierto en cualquier mundo, o evolución de tabla
+ *   - comiendo.png  -> específico de la Nevera Mágica (Tablas de Multiplicar)
+ *   - enfadado.png  -> fallo en cualquier mundo
  *
- * Mantiene la misma interfaz pública que las versiones anteriores
- * (`render`, `evolucionar`, `reaccionarComida`) para que `Shop` y
- * `main.js` no necesiten cambiar cómo la usan.
+ * Como solo hay UN diseño por sprite (no uno distinto por fase bebé/
+ * infantil/joven/épica), el crecimiento entre fases de Tablas se
+ * representa agrandando la misma ilustración.
+ *
+ * `adjuntarA(imgEl)` permite que distintas pantallas (el juego de
+ * Tablas, el Mundo de la Suma, etc.) compartan la MISMA instancia —
+ * y por tanto el mismo estado — del dragón, aunque cada pantalla
+ * tenga su propio elemento <img> en el DOM (solo una está visible a
+ * la vez). Así "el dragón" es de verdad un sistema global, no una
+ * copia distinta por mundo.
  */
 
 const ESCALA_POR_FASE = {
@@ -27,19 +34,11 @@ const ESCALA_POR_FASE = {
   epica: 1.25,
 };
 
-// Rotación de matiz para reflejar el color de slime elegido en la
-// creación sobre la MISMA ilustración (que está dibujada en verde).
-const HUE_POR_COLOR = {
-  verde: '0deg',
-  azul: '150deg',
-  rojo: '220deg',
-  morado: '280deg',
-};
-
 const SPRITES = {
   reposo: 'assets/multidrake-reposo.png',
   comiendo: 'assets/multidrake-comiendo.png',
   evolucion: 'assets/multidrake-evolucion.png',
+  enfadado: 'assets/multidrake-enfadado.png',
 };
 
 export class Monster {
@@ -47,52 +46,122 @@ export class Monster {
     this._img = imgEl;
     this._confetti = new Confetti(confettiLayerEl);
     this._colorActual = 'verde';
-    this._timeoutComida = null;
+    this._faseActual = 'bebe';
+    this._timeoutReaccion = null;
 
-    // Precarga los tres sprites para que no haya parpadeo/retardo la
-    // primera vez que se muestra "comiendo" o "evolución".
+    // Precarga los cuatro sprites para que no haya parpadeo/retardo
+    // la primera vez que se muestra cada uno.
     Object.values(SPRITES).forEach((src) => {
       const precarga = new Image();
       precarga.src = src;
     });
 
-    this._img.src = SPRITES.reposo;
+    this._mostrarSprite(SPRITES.reposo);
+  }
+
+  /**
+   * Traslada el dragón a un <img> distinto (de otra pantalla/mundo)
+   * y repinta ahí mismo su estado actual (color, escala, sprite en
+   * reposo). Es lo que hace posible que Sumas, Multiplicaciones y
+   * Tablas compartan un único "dragón global" en vez de duplicarlo.
+   */
+  adjuntarA(nuevoImgEl) {
+    clearTimeout(this._timeoutReaccion);
+    this._img = nuevoImgEl;
+    this._aplicarFiltroYEscala();
+    this._mostrarSprite(SPRITES.reposo);
   }
 
   render({ colorBase, faseMonstruo }) {
     this._colorActual = colorBase;
-    this._img.src = SPRITES.reposo;
-    this._img.style.filter = `hue-rotate(${HUE_POR_COLOR[colorBase] ?? '0deg'})`;
-    this._img.style.transform = `scale(${ESCALA_POR_FASE[faseMonstruo] ?? ESCALA_POR_FASE.bebe})`;
+    this._faseActual = faseMonstruo;
+    this._aplicarFiltroYEscala();
+    clearTimeout(this._timeoutReaccion);
+    this._mostrarSprite(SPRITES.reposo);
   }
 
-  /** Sprite de "comiendo" un instante, y vuelve solo a reposo. */
-  reaccionarComida() {
-    this._img.src = SPRITES.comiendo;
-    this._img.classList.add('monster-img-mordisco');
+  /**
+   * Reacción de ACIERTO, para cualquier mundo: Sumas, Multiplicaciones
+   * y también cada carta correcta de Tablas de Multiplicar. Muestra
+   * el sprite "feliz" un instante y vuelve sola a reposo.
+   */
+  reaccionarAcierto(duracionMs = 700) {
+    this._reaccionTemporal(SPRITES.evolucion, 'monster-img-mordisco', duracionMs);
+  }
 
-    clearTimeout(this._timeoutComida);
-    this._timeoutComida = setTimeout(() => {
-      this._img.src = SPRITES.reposo;
-      this._img.classList.remove('monster-img-mordisco');
-    }, 900);
+  /**
+   * Reacción de FALLO, para cualquier mundo.
+   * `persistente: true` la usan las pruebas de respuesta numérica
+   * (Sumas, Restas, Multiplicaciones, División): el dragón se queda
+   * enfadado hasta que el niño acierte, porque debe reintentar la
+   * MISMA pregunta. En Tablas de Multiplicar (`persistente: false`,
+   * por defecto) la siguiente carta es otra pregunta distinta, así
+   * que el enfado es solo un destello breve, igual que el acierto.
+   */
+  reaccionarFallo({ persistente = false, duracionMs = 700 } = {}) {
+    clearTimeout(this._timeoutReaccion);
+    this._img.classList.remove('monster-img-mordisco');
+    void this._img.offsetWidth;
+    this._img.classList.add('monster-img-enfadado');
+    this._mostrarSprite(SPRITES.enfadado, { conservarClase: true });
+
+    if (!persistente) {
+      this._timeoutReaccion = setTimeout(() => {
+        this._img.classList.remove('monster-img-enfadado');
+        this._mostrarSprite(SPRITES.reposo);
+      }, duracionMs);
+    }
+  }
+
+  /** Sprite de "comiendo" un instante, específico de la Nevera Mágica. */
+  reaccionarComida() {
+    this._reaccionTemporal(SPRITES.comiendo, 'monster-img-mordisco', 900);
   }
 
   evolucionar({ colorBase, faseMonstruo, nivelActual, nivelMaximo }) {
-    clearTimeout(this._timeoutComida);
+    clearTimeout(this._timeoutReaccion);
     this._colorActual = colorBase;
-    this._img.style.filter = `hue-rotate(${HUE_POR_COLOR[colorBase] ?? '0deg'})`;
-    this._img.style.transform = `scale(${ESCALA_POR_FASE[faseMonstruo] ?? ESCALA_POR_FASE.bebe})`;
-    this._img.src = SPRITES.evolucion;
+    this._faseActual = faseMonstruo;
+    this._aplicarFiltroYEscala();
+    this._img.classList.remove('monster-img-enfadado');
+    this._mostrarSprite(SPRITES.evolucion, { conservarClase: true });
     this._img.classList.add('monster-img-evolucion');
 
     this._confetti.lanzar(faseMonstruo, { esNivelMaximo: nivelActual >= nivelMaximo });
 
     // Tras el festejo, vuelve a reposo (el diálogo de "siguiente
     // paso" ya se muestra por separado, con su propio temporizador).
-    setTimeout(() => {
-      this._img.src = SPRITES.reposo;
+    this._timeoutReaccion = setTimeout(() => {
       this._img.classList.remove('monster-img-evolucion');
+      this._mostrarSprite(SPRITES.reposo);
     }, 1400);
+  }
+
+  // -------------------------------------------------------------
+  // Privado
+  // -------------------------------------------------------------
+  _reaccionTemporal(sprite, claseAnimacion, duracionMs) {
+    clearTimeout(this._timeoutReaccion);
+    this._img.classList.remove('monster-img-enfadado', claseAnimacion);
+    void this._img.offsetWidth; // fuerza reflow para poder repetir la animación
+    this._img.classList.add(claseAnimacion);
+    this._mostrarSprite(sprite, { conservarClase: true });
+
+    this._timeoutReaccion = setTimeout(() => {
+      this._img.classList.remove(claseAnimacion);
+      this._mostrarSprite(SPRITES.reposo);
+    }, duracionMs);
+  }
+
+  _mostrarSprite(src, { conservarClase = false } = {}) {
+    if (!conservarClase) {
+      this._img.classList.remove('monster-img-mordisco', 'monster-img-evolucion', 'monster-img-enfadado');
+    }
+    this._img.src = src;
+  }
+
+  _aplicarFiltroYEscala() {
+    this._img.style.filter = `hue-rotate(${HUE_POR_COLOR[this._colorActual] ?? '0deg'})`;
+    this._img.style.transform = `scale(${ESCALA_POR_FASE[this._faseActual] ?? ESCALA_POR_FASE.bebe})`;
   }
 }

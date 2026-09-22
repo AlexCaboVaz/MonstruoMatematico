@@ -7,6 +7,9 @@ import { Monster } from './Monster.js';
 import { Shop } from './Shop.js';
 import { Modal } from './Modal.js';
 import { WorldMap } from './WorldMap.js';
+import { MathWorld } from './MathWorld.js';
+import { CatchGame } from './CatchGame.js';
+import { generarSuma, generarMultiplicacionLibre, generarResta, generarDivision } from './operationGenerators.js';
 
 const NOMBRE_MONSTRUO = 'Multidrake';
 
@@ -23,6 +26,9 @@ function main() {
   const gameState = new GameState();
 
   const screenCreacion = document.getElementById('screen-creation');
+  const screenHub = document.getElementById('screen-hub');
+  const screenMultSubmenu = document.getElementById('screen-mult-submenu');
+  const screenMathWorld = document.getElementById('screen-math-world');
   const screenJuego = document.getElementById('screen-game');
 
   const modal = new Modal({
@@ -41,7 +47,7 @@ function main() {
       btnDespertar: document.getElementById('btn-despertar'),
       errorText: document.getElementById('creation-error'),
     },
-    onJugadorCreado: () => irAPantallaDeJuego(),
+    onJugadorCreado: () => irAlHub(),
   });
 
   const monster = new Monster({
@@ -59,6 +65,7 @@ function main() {
       starCount: document.getElementById('star-count'),
       levelNumber: document.getElementById('level-number'),
     },
+    dragon: monster,
     onRondaCompleta: () => shop.mostrarBotonNevera(),
   });
 
@@ -106,7 +113,51 @@ function main() {
     },
   });
 
-  // Menú desplegable (☰), accesible en todo momento durante la partida.
+  // El badge "Tabla del N" abre el selector de tablas (el mismo mapa
+  // de arriba), para poder saltar a cualquier tabla desbloqueada sin
+  // pasar por el menú global.
+  document.getElementById('btn-selector-tabla').addEventListener('click', () => {
+    worldMap.mostrar(gameState.nivelActual);
+  });
+
+  // Minijuego de recompensa (atrapar comida) al terminar cada nivel
+  // de 20 operaciones — compartido por Sumas, Restas, Multiplicaciones
+  // y División a través de MathWorld.
+  const catchGame = new CatchGame({
+    elementos: {
+      container: document.getElementById('math-catch-game'),
+      playArea: document.getElementById('catch-play-area'),
+      progress: document.getElementById('catch-progress'),
+      dragonImg: document.getElementById('catch-dragon-img'),
+    },
+  });
+
+  // Mundo Matemático genérico: una sola instancia reconfigurada para
+  // cada mundo de "20 operaciones + input numérico" (Sumas, Restas,
+  // Multiplicaciones libres y División).
+  const mathWorld = new MathWorld({
+    elementos: {
+      screen: screenMathWorld,
+      btnVolver: document.getElementById('btn-math-back'),
+      levelSelect: document.getElementById('math-level-select'),
+      worldTitle: document.getElementById('math-world-title'),
+      levelGrid: document.getElementById('math-level-grid'),
+      operationView: document.getElementById('math-operation-view'),
+      progress: document.getElementById('math-progress'),
+      operationText: document.getElementById('math-operation-text'),
+      input: document.getElementById('math-answer-input'),
+      btnComprobar: document.getElementById('btn-math-comprobar'),
+      dragonImg: document.getElementById('math-dragon-img'),
+      levelComplete: document.getElementById('math-level-complete'),
+    },
+    dragon: monster,
+    catchGame,
+  });
+
+  // Menú global (☰): visible en todo momento tras crear el personaje,
+  // en cualquier mundo, para poder volver siempre al Hub principal
+  // o salir del todo a la pantalla de inicio.
+  const globalMenuContainer = document.getElementById('global-menu-container');
   const btnMenu = document.getElementById('btn-menu');
   const menuDropdown = document.getElementById('menu-dropdown');
 
@@ -118,10 +169,41 @@ function main() {
       menuDropdown.hidden = true;
     }
   });
-  document.getElementById('menu-item-mapa').addEventListener('click', () => {
+  document.getElementById('menu-item-inicio').addEventListener('click', () => {
     menuDropdown.hidden = true;
-    worldMap.mostrar(gameState.nivelActual);
+    volverAlMenuPrincipal();
   });
+  document.getElementById('menu-item-salir').addEventListener('click', () => {
+    menuDropdown.hidden = true;
+    salirALaPantallaDeInicio();
+  });
+
+  /** Vuelve al Hub desde CUALQUIER pantalla (Sumas, Multiplicaciones,
+   * su submenú, o Tablas de Multiplicar), sin importar en qué punto
+   * de esa pantalla estuviera el jugador. */
+  function volverAlMenuPrincipal() {
+    shop.cerrarNevera();
+    modal.cerrar();
+    catchGame.detener();
+    screenMultSubmenu.hidden = true;
+    screenMathWorld.hidden = true;
+    screenJuego.hidden = true;
+    irAlHub({ saludar: false });
+  }
+
+  /** Sale del todo a la pantalla de inicio (crear personaje), desde
+   * cualquier pantalla del juego. */
+  function salirALaPantallaDeInicio() {
+    shop.cerrarNevera();
+    modal.cerrar();
+    catchGame.detener();
+    screenHub.hidden = true;
+    screenMultSubmenu.hidden = true;
+    screenMathWorld.hidden = true;
+    screenJuego.hidden = true;
+    globalMenuContainer.hidden = true;
+    screenCreacion.hidden = false;
+  }
 
   // El contador de estrellas visible se mantenía al día solo al
   // acertar cartas. Al comprar en la nevera, GameState.balanceEstrellas
@@ -131,8 +213,92 @@ function main() {
     document.getElementById('star-count').textContent = gameState.balanceEstrellas;
   });
 
-  function irAPantallaDeJuego() {
+  // Hub de Mundos: tras crear el personaje, el jugador elige a qué
+  // mundo ir.
+  document.getElementById('world-suma').addEventListener('click', () => {
+    screenHub.hidden = true;
+    mathWorld.iniciar({
+      titulo: 'Mundo de la Suma',
+      imagenesNivel: {
+        facil: 'assets/islas-suma/facil.png',
+        medio: 'assets/islas-suma/medio.png',
+        dificil: 'assets/islas-suma/dificil.png',
+      },
+      generador: generarSuma,
+      onVolver: () => irAlHub({ saludar: false }),
+    });
+  });
+
+  document.getElementById('world-resta').addEventListener('click', () => {
+    screenHub.hidden = true;
+    mathWorld.iniciar({
+      titulo: 'Mundo de la Resta',
+      imagenesNivel: {
+        facil: 'assets/islas-resta/facil.png',
+        medio: 'assets/islas-resta/medio.png',
+        dificil: 'assets/islas-resta/dificil.png',
+      },
+      generador: generarResta,
+      onVolver: () => irAlHub({ saludar: false }),
+    });
+  });
+
+  document.getElementById('world-division').addEventListener('click', () => {
+    screenHub.hidden = true;
+    mathWorld.iniciar({
+      titulo: 'Mundo de la División',
+      imagenesNivel: {
+        facil: 'assets/islas-division/facil.png',
+        medio: 'assets/islas-division/medio.png',
+        dificil: 'assets/islas-division/dificil.png',
+      },
+      generador: generarDivision,
+      onVolver: () => irAlHub({ saludar: false }),
+    });
+  });
+
+  document.getElementById('world-multiplicacion').addEventListener('click', () => {
+    screenHub.hidden = true;
+    screenMultSubmenu.hidden = false;
+  });
+
+  // Submenú de Multiplicación: Tablas (juego original, 10 islas +
+  // Nevera Mágica) o Multiplicaciones (motor de 20 operaciones).
+  document.getElementById('btn-mult-submenu-back').addEventListener('click', () => {
+    screenMultSubmenu.hidden = true;
+    irAlHub({ saludar: false });
+  });
+
+  document.getElementById('submenu-tablas').addEventListener('click', () => {
+    screenMultSubmenu.hidden = true;
+    irAPantallaDeJuego();
+  });
+
+  document.getElementById('submenu-multiplicaciones').addEventListener('click', () => {
+    screenMultSubmenu.hidden = true;
+    mathWorld.iniciar({
+      titulo: 'Multiplicaciones',
+      imagenesNivel: {
+        facil: 'assets/islas-multop/facil.png',
+        medio: 'assets/islas-multop/medio.png',
+        dificil: 'assets/islas-multop/dificil.png',
+      },
+      generador: generarMultiplicacionLibre,
+      onVolver: () => { screenMultSubmenu.hidden = false; },
+    });
+  });
+
+  function irAlHub({ saludar = true } = {}) {
     screenCreacion.hidden = true;
+    screenHub.hidden = false;
+    globalMenuContainer.hidden = false;
+    if (saludar) {
+      document.getElementById('hub-greeting').textContent = `¡Elige un mundo, ${gameState.nombre}!`;
+    }
+  }
+
+  function irAPantallaDeJuego() {
+    screenHub.hidden = true;
     screenJuego.hidden = false;
     monster.render({ colorBase: gameState.colorBase, faseMonstruo: gameState.faseMonstruo });
     cardSystem.iniciarRonda();
